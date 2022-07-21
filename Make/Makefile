@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -g -Wall
 LIBS = 
-FILES = server sockets
+FILES = server sockets httpmessage
 HEAD_DIR = ../Battleships/
 OBJS = $(patsubst %, %.o, $(FILES))
 SRC_DIR  = ../src/

@@ -77,8 +77,8 @@ void ChatSession::CheckMessage()
 
     for(i = 0; i < buf_used; i++)
         if(buffer[i] == '\n' && buffer[i-2] == '\n') {
-            buffer[i-3] = 0;
-            // serv->ProcessMessage
+            buffer[i-1] = 0;
+            the_master->ProcessMessage(buffer, this);
             int rest = buf_used - i - 1;
             memmove(buffer, buffer + i + 1, rest); 
             buf_used = rest;
