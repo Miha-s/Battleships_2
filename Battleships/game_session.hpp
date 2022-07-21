@@ -1,6 +1,7 @@
 #ifndef GAME_SESSION_HPP_SENTRY
 #define GAME_SESSION_HPP_SENTRY
 #include <vector>
+#include <string>
 
 struct GameSession {
     int p1id;
@@ -28,6 +29,8 @@ public:
     void addGame(int p1id, int p2id); 
     int removeGame(int pid);
 	int findGameByPid(int pid);
+	void setField(std::string field, int pid);
+	void addPlayer(int p1id, int p2id);
 
     int gameEnded(int pid); 
     // 0 - game hasn't ended

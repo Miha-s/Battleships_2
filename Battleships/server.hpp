@@ -47,6 +47,8 @@ class Server : public FdHandler {
 
     Server(EventSelector *sel, int fd);
 	void registerPlayer(ChatSession* ses, Headers& user);
+	void send(int id, const std::string& body);
+	void sendMes(int fd, const std::string& mes);
 public:
 	void ProcessMessage(char *str, ChatSession* ses);
     static Server *Start(EventSelector *sel, int port);

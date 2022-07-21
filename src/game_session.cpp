@@ -56,3 +56,20 @@ int Games::findGameByPid(int pid)
             return i;
     return -1;
 }
+
+void Games::setField(std::string field, int pid)
+{
+	// the field string is in format of string of numbers of the field
+	// from left to right, from top to bottom
+    int gm = findGameByPid(pid);
+    int (*f)[10] = (pid == games[gm].p1id) ? games[gm].p1field : games[gm].p2field;
+    for(int i = 0; i < 10; i++)
+        for(int j = 0; j < 10; j++) 
+            f[i][j] = field[i*10+j] - '0';
+}
+
+void Games::addPlayer(int p1id, int p2id)
+{
+    int gm = findGameByPid(p1id);
+    games[gm].p2id = p2id;
+}

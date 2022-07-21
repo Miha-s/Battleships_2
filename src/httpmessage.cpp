@@ -130,3 +130,15 @@ string get_type(const string& str)
     tmp += "; charset=utf-8";
     return tmp;
 }
+
+string get_post_data(const string& str)
+{
+    const char* tmp = str.c_str();
+    int i = 0;
+    for(;tmp[i] != '?'; i++) 
+		if(tmp[i] == 0)
+			return string("");
+    i++;
+    string data(tmp + i);
+    return data;
+}

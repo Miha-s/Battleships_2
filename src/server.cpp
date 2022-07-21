@@ -138,6 +138,27 @@ void Server::ProcessMessage(char *str, ChatSession* ses)
     close(fd);
 }
 
+void Server::registerPlayer(ChatSession* ses, Headers& user_heads) 
+{
+    if(!first_player_id) {
+        first_player_id = ses->id;
+        std::string field = get_post_data(user_heads.file);
+        gms.addGame(ses->id, 0);
+        gms.setField(field, ses->id);
+        ses->in_game = true;
+    } else {
+        gms.addPlayer(first_player_id, ses->id);
+        std::string field = get_post_data(user_heads.file);
+        gms.setField(field, ses->id);
+        ses->in_game = true;
+        
+        std::string body = "N";  // None shot
+        send(first_player_id, body);
+
+        first_player_id = 0;
+    }
+}
+
 /////// Sever part ///////
 
 Server::Server(EventSelector *sel, int fd)
