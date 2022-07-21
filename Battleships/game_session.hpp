@@ -27,6 +27,7 @@ public:
 
     void addGame(int p1id, int p2id); 
     int removeGame(int pid);
+	int findGameByPid(int pid);
 
     int gameEnded(int pid); 
     // 0 - game hasn't ended
