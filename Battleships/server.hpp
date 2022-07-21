@@ -42,11 +42,10 @@ class Server : public FdHandler {
 
     Server(EventSelector *sel, int fd);
 public:
-    ~Server();
+
     static Server *Start(EventSelector *sel, int port);
-
     void RemoveSession(ChatSession *s);
-
+    ~Server();
 private:
     virtual void Handle(bool r, bool w);
 };
