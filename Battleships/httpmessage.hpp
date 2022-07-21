@@ -16,8 +16,9 @@ struct Headers {
 };
 
 
-int get_headers(char *mes, Headers& h);
-string set_headers(Headers h);
+void get_headers(char *mes, Headers& h);
+string set_headers(Headers& h);
+void fillResponse(Headers& user, Headers& serv);
 
 int get_id(const string& str);
 string get_type(const string& str);
