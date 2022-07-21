@@ -49,3 +49,48 @@ bool EventSelector::Remove(FdHandler *h)
     }
     return true;
 }
+void EventSelector::Run()
+{
+    quit_flag = false;
+    do {
+        int i;
+        fd_set rds, wrs;
+        FD_ZERO(&rds);
+        FD_ZERO(&wrs);
+        for(int i = 0; i <= max_fd; i++) {
+            if(!fd_array[i])
+                continue;
+            if(fd_array[i]->WantRead())
+                FD_SET(i, &rds);
+            if(fd_array[i]->WantWrite())
+                FD_SET(i, &wrs);
+        }
+        
+
+        int res = select(max_fd + 1, &rds, &wrs, 0, 0);
+        if(res < 0) {
+            if(errno == EINTR) // got some signal
+                continue;
+            else 
+                break;
+        }
+
+        if(res > 0) {
+            for(i = 0; i <= max_fd; i++) {
+                if(!fd_array[i])
+                    continue;
+                bool r = FD_ISSET(i, &rds);
+                bool w = FD_ISSET(i, &wrs);
+                if(r || w)
+                    fd_array[i]->Handle(r, w); // process socket
+            }
+        }
+    } while(!quit_flag);
+}
+
+FdHandler::~FdHandler()
+{
+    if(own_fd)
+        close(fd);
+}
+
