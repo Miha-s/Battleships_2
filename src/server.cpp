@@ -45,9 +45,15 @@ void ChatSession::ReadAndIgnore()
         return;
     }
     int i;
+	// skip to the next message
+	// here we suppose that all messages are without body
     for(i = 0; i < rc; i++)
-        if("change later") { // stop ignoring!
-            //...
+        if(buffer[i] == '\n' && buffer[i-2] == '\n') { 
+            int rest = rc - i - 1;
+            if(rest > 0)
+                memmove(buffer, buffer + i + 1, rest);
+            buf_used = rest;
+            ignoring = 0;
             CheckMessage();
         }
 }
@@ -56,7 +62,8 @@ void ChatSession::ReadAndCheck()
 {
     int rc = read(GetFd(), buffer+buf_used, sizeof(buffer)-buf_used);
     if(rc < 1) {
-        //...
+        the_master->RemoveSession(this);
+        return ;
     }
     buf_used += rc;
     CheckMessage();
@@ -67,9 +74,10 @@ void ChatSession::CheckMessage()
     if(buf_used <= 0)
         return;
     int i;
-    for(i = 0; i < buf_used; i++) {
-        if("End of message") {
-            buffer[i] = 0;
+
+    for(i = 0; i < buf_used; i++)
+        if(buffer[i] == '\n' && buffer[i-2] == '\n') {
+            buffer[i-3] = 0;
             // serv->ProcessMessage
             int rest = buf_used - i - 1;
             memmove(buffer, buffer + i + 1, rest); 
@@ -77,7 +85,13 @@ void ChatSession::CheckMessage()
             CheckMessage();
             return;
         }
-    }
+}
+
+void Server::ProcessMessage(char *str, ChatSession* ses)
+{
+
+    // Process request
+
 }
 
 /////// Sever part ///////

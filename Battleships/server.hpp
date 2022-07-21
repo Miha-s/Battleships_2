@@ -3,11 +3,12 @@
 #include <list>
 
 #include "sockets.hpp"
+#include "game_session.hpp"
 
 
 enum {
-    max_line_length = 1023,
-    qlen_for_listen = 16
+    max_mes_length = 2047,
+    qlen_for_listen = 16    // size of queue for listening socket
 };
 
 class Server;
@@ -15,7 +16,7 @@ class Server;
 class ChatSession : FdHandler {
     friend class Server;
 
-    char buffer [max_line_length + 1];
+    char buffer [max_mes_length + 1];
     int buf_used;
     bool ignoring;
 
@@ -38,11 +39,13 @@ class ChatSession : FdHandler {
 class Server : public FdHandler {
     EventSelector *the_selector;
     std::list <ChatSession*> sessions;
-
+    Games gms;
+    int initial_id = 1;
+    int first_player_id; // this player will be waiting for other player to come
 
     Server(EventSelector *sel, int fd);
 public:
-
+	void ProcessMessage(char *str, ChatSession* ses);
     static Server *Start(EventSelector *sel, int port);
     void RemoveSession(ChatSession *s);
     ~Server();
