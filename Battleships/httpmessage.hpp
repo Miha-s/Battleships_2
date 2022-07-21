@@ -2,25 +2,25 @@
 #define HTTPMESSAGE_HPP_SENTRY
 #include <string>
 
-using std::string;
+
 
 struct Headers {
-    string method;
-    string file;
-    string code;
-    string connection;
-    string contentType;
-    string contentLength;
-    string cookies;
-    string body;
+    std::string method;
+    std::string file;
+    std::string code;
+    std::string connection;
+    std::string contentType;
+    std::string contentLength;
+    std::string cookies;
+    std::string body;
 };
 
 
 void get_headers(char *mes, Headers& h);
-string set_headers(Headers& h);
+std::string set_headers(Headers& h);
 void fillResponse(Headers& user, Headers& serv);
 
 int get_id(const string& str);
-string get_type(const string& str);
+std::string get_type(const string& str);
 
 #endif

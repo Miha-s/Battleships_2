@@ -4,6 +4,7 @@
 
 #include "sockets.hpp"
 #include "game_session.hpp"
+#include "../Battleships/httpmessage.hpp"
 
 
 enum {
@@ -19,6 +20,7 @@ class ChatSession : FdHandler {
     char buffer [max_mes_length + 1];
     int buf_used;
     bool ignoring;
+	bool in_game;
 
     int id;
 
@@ -44,6 +46,7 @@ class Server : public FdHandler {
     int first_player_id; // this player will be waiting for other player to come
 
     Server(EventSelector *sel, int fd);
+	void registerPlayer(ChatSession* ses, Headers& user);
 public:
 	void ProcessMessage(char *str, ChatSession* ses);
     static Server *Start(EventSelector *sel, int port);

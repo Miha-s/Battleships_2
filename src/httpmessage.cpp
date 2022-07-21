@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+using std::string;
 
 // get header and first option, skip the rest of line
 // mes - the string

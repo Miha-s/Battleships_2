@@ -4,12 +4,18 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <fcntl.h>
+#include <sys/sendfile.h>
 
 #include "../Battleships/server.hpp"
 
+#ifdef DEBUGGING
+#include <iostream>
+#endif
+
 ChatSession::ChatSession(Server *a_master, int fd) 
     : FdHandler(fd, true), buf_used(0), ignoring(false),
-    the_master(a_master)
+	in_game(false), the_master(a_master)
 { 
 	
 }
@@ -89,9 +95,47 @@ void ChatSession::CheckMessage()
 
 void Server::ProcessMessage(char *str, ChatSession* ses)
 {
-
     // Process request
+#ifdef DEBUGGING
+    std::cout << str;
+	std::cout << ses->GetFd();
+#endif
+    int id = initial_id;
+    Headers user_heads;
+    Headers serv_heads;
 
+    get_headers(str, user_heads);
+    if(user_heads.cookies.empty()) {
+        serv_heads.cookies = "id=";
+        serv_heads.cookies += std::to_string(initial_id);
+        ses->id = initial_id;
+        initial_id++;
+    } else {
+        ses->id = get_id(user_heads.cookies);
+    }
+
+    if(user_heads.method == "POST") {
+        if(ses->in_game) {
+            // process post message
+        } else {
+            registerPlayer(ses, user_heads);
+        }
+    }
+
+    int size;
+    int fd = open(serv_heads.file.c_str(), O_RDONLY);
+    fillResponse(user_heads, serv_heads);
+
+    std::string response_header = set_headers(serv_heads);
+#ifdef DEBUGGING
+    std::cout << response_header;
+#endif
+
+    const char* buf = response_header.c_str();
+    int sd = ses->GetFd();
+    write(sd, buf, strlen(buf));
+    sendfile(sd, fd, NULL, size);
+    close(fd);
 }
 
 /////// Sever part ///////
