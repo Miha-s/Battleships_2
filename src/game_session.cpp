@@ -40,6 +40,7 @@ bool Games::empty(int (*arr)[10])
 void Games::addGame(int p1id, int p2id)
 {
     GameSession tmp(p1id, p2id);
+    tmp.ready = true;
     games.push_back(tmp);
 }
 
