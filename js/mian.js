@@ -42,10 +42,11 @@ let game = {
 		parseShip() {},
 		validateInput(coords) {},
 		correctPosition(coords) {}, 
-		setData() {}, 
+		setData(coords) {}, 
 		setPicture() {},
 	},
 	initGame() {},
+	sendShips() {}, 
 };
 
 game.getPosition.correctPosition = function(coords) {
@@ -78,7 +79,8 @@ game.getPosition.validateInput = function(coords) {
 	let arr_coords = coords.split(" ");
 	this.last_length = arr_coords.length;
 
-	if(this.ships_remain.get(this.last_length) == 0) // ships of such length are already entered
+	let tmp = this.ships_remain.get(this.last_length);
+	if(tmp == undefined || tmp == 0) // ships of such length are already entered
 		return false;
 	let arr_int_coords = [];
 	for(i = 0; i < arr_coords.length; i++) {
@@ -138,12 +140,27 @@ game.getPosition.parseShip = function() {
 
 	// set pictures
 	game.getPosition.setPicture();
+
+	if(game.getPosition.count_ships_remain == 0)
+	game.initGame();
 }
 
+game.setShips = function() {
+	let xhttp = new XMLHttpRequest();
+	onreadystatechange = function() { alert("Ok"); }
+	xhttp.open("POST", "/page.html", true);
+	xhttp.send();
+}
+
+game.initGame = function() {
+	view.displayMessage("Your first message");
+	this.setShips();
+};
 
 function main() {
 	let but = document.getElementById("fireButton");
 	but.onclick = game.getPosition.parseShip;
+	view.displayMessage("Hello Stranger! \n Enter all your ships below: ");
 }
 
 window.onload = main;
