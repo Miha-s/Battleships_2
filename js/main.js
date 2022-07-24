@@ -218,7 +218,7 @@ game.getPosition.parseShip = function() {
 	game.initGame();
 }
 
-game.validateShot = function(coords) {
+game.getPosition.validateShot = function(coords) {
 	if(Number.isNaN(Number(coords[0])))
 		return false;
 	if(Number.isNaN(Number(coords[1])))
