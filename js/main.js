@@ -13,7 +13,7 @@ view.displayCell = function(what, where, position) {
 		what == "hit-ship";
 	else
 		what == "miss";
-	let id = (where == "player") ? "" : "i";
+	let id = (where == "player" ? "" : "i");
 	position += id;
 	
 	let cell = document.getElementById(position);
@@ -56,10 +56,12 @@ let game = {
 		setData(coords) {}, 
 		setPicture() {},
 	},
+	last_shot: "N",
 	initGame() {},
 	setShips(file) {}, 
 	shot() {},
 	handleShot() {}, 
+	validateShot(coords) {},
 };
 
 game.getPosition.correctPosition = function(coords) {
@@ -158,11 +160,54 @@ game.getPosition.parseShip = function() {
 	game.initGame();
 }
 
+game.validateShot = function(coords) {
+	if(Number.isNaN(Number(coords[0])))
+		return false;
+	if(Number.isNaN(Number(coords[1])))
+		return false;
+	return true;
+}
+
+game.shot = function () {
+	let Input = document.getElementById("guessInput");
+	let coords = Input.value;
+	Input.value = "";
+	if(!game.getPosition.validateShot(coords))
+		return;
+	
+	game.last_shot = coords[0] + coords[1];
+	let file = "/game?" + game.last_shot;
+	game.setShips(file);
+}
+
+game.handleShot = function() {
+	if(this.readyState < 4)
+		return;
+	let mes = this.responseText;
+	if(mes[0] == "N")
+		return;
+	let data = mes.split("\n");
+	let y = Number(data[0][0]);
+	let x = Number(data[0][1]);
+	let hit;
+	if(parameters.player_field[y][x])
+		hit = "hit";
+	else
+		hit = "miss";
+	view.displayCell(hit, "player", data[0]);
+	if(data[1] == "+")
+		hit = "hit";
+	else
+		hit = "miss";
+	view.displayCell(hit, "oponent", game.last_shot);
+}
+	
+
 game.setShips = function(file) {
 	let xhttp = new XMLHttpRequest();
 	xhttp.onreadystatechange = game.handleShot;
 	xhttp.open("POST", file, true);
-	xhttp.send();
+	xhttp.send("");
 }
 
 game.initGame = function() {
