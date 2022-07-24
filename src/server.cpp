@@ -139,7 +139,8 @@ void Server::ProcessMessage(char *str, ChatSession* ses)
     const char* buf = response_header.c_str();
     int sd = ses->GetFd();
     write(sd, buf, strlen(buf));
-    sendfile(sd, fd, NULL, size);
+    int err = sendfile(sd, fd, NULL, size);
+    std::cout << err << std::endl;
     close(fd);
 }
 
