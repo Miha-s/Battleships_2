@@ -188,12 +188,29 @@ game.shotcallback = function () {
 	let mes = this.responseText;
 	if(mes == "N")
 		return ;
-	if(mes == "+")
+	if(mes == "W" || mes == "L") {
+		processEnd(mes);
+		return ;
+	}
+	if(mes == "+") {
+		view.displayMessage("You hit him!");
 		hit = "hit";
-	else
+	} else {
+		view.displayMessage("Oh, you miss...");
 		hit = "miss";
+	}
 	view.displayCell(hit, "oponent", game.last_shot);
 	game.setShips("/game?g", game.handleShot);	// waiting for other player to fire
+}
+
+game.processEnd = function(mes) {
+	if(mes == "W")
+		view.displayMessage("Yey! You Win");
+	else
+		view.displayMessage("Oh... you lose...");
+	let but = document.getElementById("fireButton");
+	but.onclick = null;
+	
 }
 
 game.handleShot = function() {
@@ -223,16 +240,18 @@ game.setShips = function(file, callback) {
 game.setcallback = function() {
 	if(this.readyState < 4)
 		return ;
-	if(this.responseText == "Y")  // it is your turn to fire
+	if(this.responseText == "Y") { // it is your turn to fire
+		view.displayMessage("Yey! It is your turn!");
 		return ;
-	else {						  // a shot has come
+	} else {						  // a shot has come
 		this.func = game.handleShot;
+		view.displayMessage("It's your turn now");
 		this.func();
 	}
 }
 
 game.initGame = function() {
-	view.displayMessage("Your first message");
+	view.displayMessage("Waiting for other player");
 	let file_request = new String();
 	parameters.player_field.forEach( (e) => {
 		e.forEach( (el) => file_request += String(el) );
