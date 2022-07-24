@@ -12,7 +12,7 @@ let view = {
 let parameters = {
 	player_field: [],
 	oponent_field: [],
-	ship_sizes: new Map([
+	ships_sizes: new Map([
 	// first number is ship length, and second amount of such ships
 		[1, 3],
 		[2, 2],
@@ -31,7 +31,7 @@ let parameters = {
 	
 };
 
-parameters.ship_sizes.forEach((val) => parameters.ships_count += val);
+parameters.ships_sizes.forEach((val) => parameters.ships_count += val);
 
 let game = {
 	getPosition: {
