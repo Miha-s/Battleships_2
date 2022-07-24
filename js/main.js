@@ -235,7 +235,7 @@ game.shot = function () {
 	
 	game.last_shot = coords[0] + coords[1];
 	let file = "/game?" + game.last_shot;
-	game.setShips(file);
+	game.setShips(file, game.shotcallback);
 }
 
 game.shotcallback = function () {

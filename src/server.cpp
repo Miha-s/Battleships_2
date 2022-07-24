@@ -275,7 +275,7 @@ void Server::sendMes(int sd, const std::string& body)
 #ifdef DEBUGGING
     std::cout << sd << std::endl;
     std::cout << response_header;
-    std::cout << body;
+    std::cout << body << std::endl;
 #endif
 
     const char* buf = response_header.c_str();
