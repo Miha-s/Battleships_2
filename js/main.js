@@ -54,6 +54,7 @@ let game = {
 		correctPosition(coords) {}, 
 		setData(coords) {}, 
 		setPicture() {},
+		validateShot(coords) {},
 		process_clicks: {
 			last_clicks: [],
 			click() {},
@@ -68,7 +69,6 @@ let game = {
 	setShips(file, callback) {}, 
 	shot() {},
 	handleShot() {}, 
-	validateShot(coords) {},
 	shotcallback() {},
 	setcallback() {},
 };
