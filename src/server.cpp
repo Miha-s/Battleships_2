@@ -127,8 +127,8 @@ void Server::ProcessMessage(char *str, ChatSession* ses)
     }
 
     int size;
-    int fd = open(serv_heads.file.c_str(), O_RDONLY);
     fillResponse(user_heads, serv_heads);
+    int fd = open(serv_heads.file.c_str(), O_RDONLY);
 	size = strtol(serv_heads.contentLength.c_str(), nullptr, 10);
     
     std::string response_header = set_headers(serv_heads);
