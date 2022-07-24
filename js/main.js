@@ -4,10 +4,21 @@ let view = {
 		var messageArea = document.getElementById("message");
 		messageArea.innerHTML = msg;
 	},
-	displayCell(what, whose) {},
+	displayCell(what, where, position) {},
 	clearField(whose) {}
 };
 
+view.displayCell = function(what, where, position) {
+	if(what == "hit")
+		what == "hit-ship";
+	else
+		what == "miss";
+	let id = (where == "player") ? "" : "i";
+	position += id;
+	
+	let cell = document.getElementById(position);
+	cell.setAttribute("class", what);
+}
 
 let parameters = {
 	player_field: [],
@@ -47,6 +58,8 @@ let game = {
 	},
 	initGame() {},
 	sendShips() {}, 
+	shot() {},
+	handleShot() {}, 
 };
 
 game.getPosition.correctPosition = function(coords) {
