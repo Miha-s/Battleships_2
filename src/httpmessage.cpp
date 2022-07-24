@@ -65,7 +65,7 @@ void get_headers(char *mes, Headers& h)
 
 void add_header(string& resp, const string& header, const string& val)
 {
-    resp += header + ":" + val + "\r\n";
+    resp += header + ": " + val + "\r\n";
 }
 
 string set_headers(Headers& h)
