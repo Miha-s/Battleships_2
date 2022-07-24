@@ -54,6 +54,8 @@ class Server : public FdHandler {
 
 	ChatSession* findCurrent(int id);
 	void shot(ChatSession* ses, Headers& user_heads);
+
+	void processEnd(int winer, int pid, std::string& coords);
 public:
 	void ProcessMessage(char *str, ChatSession* ses);
     static Server *Start(EventSelector *sel, int port);

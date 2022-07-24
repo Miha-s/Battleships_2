@@ -10,14 +10,31 @@ int Games::hit(int y, int x, int pid)
         res = games[pos].p2field[y][x];
         games[pos].p2field[y][x] = 0;
 		games[pos].p1turn = false;
+        if(empty(games[pos].p2field)) {
+            games[pos].game_end = true;
+            games[pos].p1winner = true;
+        }
     } else if(pid == games[pos].p2id && !games[pos].p1turn) {
         res = games[pos].p1field[y][x];
         games[pos].p1field[y][x] = 0;
 		games[pos].p1turn = true;
+        if(empty(games[pos].p1field)) {
+            games[pos].game_end = true;
+            games[pos].p1winner = false;
+        }
     } else
         return -1;
 
     return res;
+}
+
+bool Games::empty(int (*arr)[10])
+{
+    for(int i = 0; i < 10; i++)
+        for(int j = 0; j < 10; j++)
+            if(arr[i][j] != 0)
+                return false;
+    return true;
 }
 
 void Games::addGame(int p1id, int p2id)
@@ -105,3 +122,4 @@ void Games::setReady(int pid, bool ready)
     int gm = findGameByPid(pid);
     games[gm].ready = ready;
 }
+

@@ -19,8 +19,10 @@ struct GameSession {
  
 // class to manipulate all games silmutaneously   
 class Games {
-    int last_game_id;
+	bool empty(int (*arr)[10]);
 public:
+    int last_game_id;
+
     Games() : last_game_id(0) {}
     std::vector<GameSession> games;
     int hit(int y, int x, int pid);

@@ -182,7 +182,7 @@ void Server::shot(ChatSession* ses, Headers& user_heads)
 
         int winer;
         if((winer = gms.gameEnded(ses->id))) {
-            // process end
+			processEnd(winer, ses->id, body);
             return ;
         }
 
@@ -250,6 +250,25 @@ void Server::sendMes(int sd, const std::string& body)
     if(err == -1)
         std::cout << "Something gone wrong";
 #endif
+}
+
+void Server::processEnd(int winer, int pid, std::string& coords)
+{
+    int opid = gms.getOtherPid(pid);
+
+    std::string mes;
+    if(pid == winer)
+        mes = "W";
+    else 
+        mes = "L";
+    send(pid, mes);
+    mes = coords + "\n";
+    if(opid == winer)
+        mes += "W";
+    else 
+        mes += "L";
+    send(opid, mes);
+    gms.removeGame(pid);
 }
 
 ChatSession* Server::findCurrent(int id)
