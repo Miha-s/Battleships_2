@@ -95,8 +95,13 @@ void fillResponse(Headers& user, Headers& serv)
     serv.connection = "Keep-Alive";
 
 	struct stat buf;
-	stat(serv.file.c_str(), &buf);
-    int size = buf.st_size;
+	int err = stat(serv.file.c_str(), &buf);
+    int size;
+    if(err)
+        size = 0;
+    else
+        size = buf.st_size;
+    
     serv.contentLength = std::to_string(size);
 
 	free(path);
