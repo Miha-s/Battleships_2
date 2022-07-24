@@ -197,7 +197,6 @@ void Server::processShot(ChatSession* ses)
     body = gms.games[gm].coords;
     gms.setReady(ses->id, true);
     int opid = gms.getOtherPid(ses->id);
-    ses->current = true;
 
     int winer;
     if((winer = gms.gameEnded(ses->id))) {
@@ -207,6 +206,8 @@ void Server::processShot(ChatSession* ses)
 
     send(opid, body);
     findCurrent(opid)->current = false;
+    ses->current = true;
+
 }
 
 void Server::shot(ChatSession* ses, Headers& user_heads)
