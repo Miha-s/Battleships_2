@@ -91,7 +91,7 @@ void fillResponse(Headers& user, Headers& serv)
     serv.contentType = get_type(user.file);
 	char* path = get_current_dir_name();
     serv.file += path;
-	serv.file += "../" + user.file;
+	serv.file += user.file;
     serv.connection = "Keep-Alive";
 
 	struct stat buf;
