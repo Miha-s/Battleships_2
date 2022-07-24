@@ -37,7 +37,7 @@ int read_line(char* mes, char* &header, char* &data, char* &next)
     for(; mes[i] != '\n';i++) 
 		if(mes[i] == 0)
 			return 0;
-    next = mes+i;
+    next = mes+i+1;
     return 1;
 }
 
