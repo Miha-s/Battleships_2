@@ -124,6 +124,7 @@ void Server::ProcessMessage(char *str, ChatSession* ses)
         } else {
             registerPlayer(ses, user_heads);
         }
+        return ;
     }
 
     int size;
@@ -152,6 +153,7 @@ void Server::registerPlayer(ChatSession* ses, Headers& user_heads)
         gms.addGame(ses->id, 0);
         gms.setField(field, ses->id);
         ses->in_game = true;
+        ses->current = true;
     } else {
         gms.addPlayer(first_player_id, ses->id);
         std::string field = get_post_data(user_heads.file);
@@ -160,6 +162,8 @@ void Server::registerPlayer(ChatSession* ses, Headers& user_heads)
         
         std::string body = "N";  // None shot
         send(first_player_id, body);
+        ses->current = true;
+        findCurrent(first_player_id)->current = false;
 
         first_player_id = 0;
     }
