@@ -114,9 +114,12 @@ void Server::ProcessMessage(char *str, ChatSession* ses)
         ses->id = get_id(user_heads.cookies);
     }
 
+    if(gms.findGameByPid(ses->id) != -1)
+        ses->in_game = true;
+
     if(user_heads.method == "POST") {
         if(ses->in_game) {
-            // process post message
+            shot(ses, user_heads);
         } else {
             registerPlayer(ses, user_heads);
         }
@@ -157,6 +160,15 @@ void Server::registerPlayer(ChatSession* ses, Headers& user_heads)
 
         first_player_id = 0;
     }
+}
+
+ChatSession* Server::findCurrent(int id)
+{
+	for(auto elem : sessions) {
+        if(elem->id == id && elem->current)
+            return elem;
+    }
+    return 0;
 }
 
 /////// Sever part ///////

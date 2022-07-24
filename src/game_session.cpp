@@ -73,3 +73,35 @@ void Games::addPlayer(int p1id, int p2id)
     int gm = findGameByPid(p1id);
     games[gm].p2id = p2id;
 }
+
+int Games::getOtherPid(int pid)
+{
+    int gm = findGameByPid(pid);
+    if(games[gm].p1id == pid)
+        return games[gm].p2id;
+    else
+        return games[gm].p1id;
+}
+
+bool Games::playerTurn(int pid)
+{
+    int gm = findGameByPid(pid);
+    if(games[gm].p1id == pid && games[gm].p1turn)
+        return true;
+    else if(games[gm].p2id == pid && !games[gm].p1turn)
+        return true;
+    else 
+        return false;
+}
+
+bool Games::playerReady(int pid)
+{
+    int gm = findGameByPid(pid);
+    return games[gm].ready;
+}
+
+void Games::setReady(int pid, bool ready)
+{
+    int gm = findGameByPid(pid);
+    games[gm].ready = ready;
+}

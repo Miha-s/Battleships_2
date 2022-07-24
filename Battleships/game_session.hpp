@@ -11,6 +11,7 @@ struct GameSession {
     bool p1turn = true;
     bool game_end = false;
     bool p1winner;
+	bool ready;
     GameSession(int _p1id, int _p2id) :
         p1id(_p1id), p2id(_p2id) {}
 };
@@ -31,6 +32,11 @@ public:
 	int findGameByPid(int pid);
 	void setField(std::string field, int pid);
 	void addPlayer(int p1id, int p2id);
+
+	int getOtherPid(int pid);
+    bool playerTurn(int pid);
+    bool playerReady(int pid);
+    void setReady(int pid, bool ready);
 
     int gameEnded(int pid); 
     // 0 - game hasn't ended

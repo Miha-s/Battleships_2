@@ -21,6 +21,7 @@ class ChatSession : FdHandler {
     int buf_used;
     bool ignoring;
 	bool in_game;
+	bool current;  // to mark the descriptor waiting for response
 
     int id;
 
@@ -49,6 +50,8 @@ class Server : public FdHandler {
 	void registerPlayer(ChatSession* ses, Headers& user);
 	void send(int id, const std::string& body);
 	void sendMes(int fd, const std::string& mes);
+	ChatSession* findCurrent(int id);
+	void shot(ChatSession* ses, Headers& user_heads);
 public:
 	void ProcessMessage(char *str, ChatSession* ses);
     static Server *Start(EventSelector *sel, int port);
