@@ -12,7 +12,7 @@ struct GameSession {
     bool p1turn = true;
     bool game_end = false;
     bool p1winner;
-	bool ready;
+	bool ready = true;
     GameSession(int _p1id, int _p2id) :
         p1id(_p1id), p2id(_p2id) {}
 };
