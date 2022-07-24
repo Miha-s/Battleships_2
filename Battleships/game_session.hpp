@@ -4,6 +4,7 @@
 #include <string>
 
 struct GameSession {
+	std::string coords;  // last shot
     int p1id;
     int p2id;
     int p1field [10][10]; // 0 means nothing, 1 there is a ship

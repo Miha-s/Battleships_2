@@ -48,8 +48,10 @@ class Server : public FdHandler {
 
     Server(EventSelector *sel, int fd);
 	void registerPlayer(ChatSession* ses, Headers& user);
-	void send(int id, const std::string& body);
 	void sendMes(int fd, const std::string& mes);
+	void send(ChatSession* ses, const std::string& body);
+	void send(int id, const std::string& body);
+
 	ChatSession* findCurrent(int id);
 	void shot(ChatSession* ses, Headers& user_heads);
 public:

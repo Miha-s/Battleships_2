@@ -9,6 +9,8 @@
 
 #include "../Battleships/server.hpp"
 
+#define DEBUGGING
+
 #ifdef DEBUGGING
 #include <iostream>
 #endif
@@ -100,7 +102,6 @@ void Server::ProcessMessage(char *str, ChatSession* ses)
     std::cout << str;
 	std::cout << ses->GetFd();
 #endif
-    int id = initial_id;
     Headers user_heads;
     Headers serv_heads;
 
@@ -128,6 +129,7 @@ void Server::ProcessMessage(char *str, ChatSession* ses)
     int size;
     int fd = open(serv_heads.file.c_str(), O_RDONLY);
     fillResponse(user_heads, serv_heads);
+	size = strtol(serv_heads.contentLength.c_str(), nullptr, 10);
 
     std::string response_header = set_headers(serv_heads);
 #ifdef DEBUGGING
@@ -160,6 +162,94 @@ void Server::registerPlayer(ChatSession* ses, Headers& user_heads)
 
         first_player_id = 0;
     }
+}
+
+void Server::shot(ChatSession* ses, Headers& user_heads)
+{
+    std::string coords = get_post_data(user_heads.file);
+    char g = coords[0];
+    int gm = gms.findGameByPid(ses->id);
+    
+	// if player, who have shot, is ready to get message
+    if(g == 'g' && gms.playerTurn(gms.getOtherPid(ses->id)) 
+                && !gms.playerReady(ses->id)) 
+    {
+        std::string body;
+        body = gms.games[gm].coords;
+        gms.setReady(ses->id, true);
+        int opid = gms.getOtherPid(ses->id);
+        ses->current = true;
+
+        int winer;
+        if((winer = gms.gameEnded(ses->id))) {
+            // process end
+            return ;
+        }
+
+        send(opid, body);
+        findCurrent(opid)->current = false;
+
+        return;
+    } else if(g == 'g' || !gms.playerReady(ses->id)) {
+        std::string body = "N";
+        send(ses, body);
+        return;
+    }
+
+    int y = coords[0] - '0';
+    int x = coords[1] - '0';
+
+    int res = gms.hit(y, x, ses->id);
+    if(res == -1) {
+        // not your turn
+        std::string body = "N";
+        send(ses, body);
+        return;
+    } 
+    gms.games[gm].coords = coords;
+    gms.setReady(ses->id, false);
+    
+    std::string body;
+    if(res)
+        body += "+";
+    else 
+        body += "-";
+
+    send(ses, body);
+}
+
+void Server::send(ChatSession* ses, const std::string& body)
+{
+	sendMes(ses->GetFd(), body);
+}
+
+void Server::send(int id, const std::string& body)
+{
+	int fd = findCurrent(id)->GetFd();
+	sendMes(fd, body);
+}
+
+void Server::sendMes(int sd, const std::string& body)
+{
+    Headers serv;
+    serv.contentLength = std::to_string(body.size());
+    
+    std::string response_header = set_headers(serv);
+#ifdef DEBUGGING
+    std::cout << sd << std::endl;
+    std::cout << response_header;
+    std::cout << body;
+#endif
+
+    const char* buf = response_header.c_str();
+    write(sd, buf, strlen(buf));
+    buf = body.c_str();
+    int err = write(sd, buf, strlen(buf));
+
+#ifdef DEBUGGING
+    if(err == -1)
+        std::cout << "Something gone wrong";
+#endif
 }
 
 ChatSession* Server::findCurrent(int id)
