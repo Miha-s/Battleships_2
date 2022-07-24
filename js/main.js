@@ -10,9 +10,9 @@ let view = {
 
 view.displayCell = function(what, where, position) {
 	if(what == "hit")
-		what == "hit-ship";
+		what = "hit-ship";
 	else
-		what == "miss";
+		what = "miss";
 	let id = (where == "player" ? "" : "i");
 	position += id;
 	
@@ -24,7 +24,7 @@ let parameters = {
 	player_field: [],
 	oponent_field: [],
 	ships_sizes: new Map([
-	// first number is ship length, and second amount of such ships
+	// first number is ship length, and second - amount of such ships
 		[1, 3],
 		[2, 2],
 		[3, 2],
@@ -58,10 +58,12 @@ let game = {
 	},
 	last_shot: "N",
 	initGame() {},
-	setShips(file) {}, 
+	setShips(file, callback) {}, 
 	shot() {},
 	handleShot() {}, 
 	validateShot(coords) {},
+	shotcallback() {},
+	setcallback() {},
 };
 
 game.getPosition.correctPosition = function(coords) {
@@ -180,34 +182,53 @@ game.shot = function () {
 	game.setShips(file);
 }
 
+game.shotcallback = function () {
+	if(this.readyState < 4)
+		return ;
+	let mes = this.responseText;
+	if(mes == "N")
+		return ;
+	if(mes == "+")
+		hit = "hit";
+	else
+		hit = "miss";
+	view.displayCell(hit, "oponent", game.last_shot);
+	game.setShips("/game?g", game.handleShot);	// waiting for other player to fire
+}
+
 game.handleShot = function() {
 	if(this.readyState < 4)
 		return;
 	let mes = this.responseText;
-	if(mes[0] == "N")
+	if(mes == "N")
 		return;
-	let data = mes.split("\n");
-	let y = Number(data[0][0]);
-	let x = Number(data[0][1]);
+	let y = Number(mes[0]);
+	let x = Number(mes[1]);
 	let hit;
 	if(parameters.player_field[y][x])
 		hit = "hit";
 	else
 		hit = "miss";
-	view.displayCell(hit, "player", data[0]);
-	if(data[1] == "+")
-		hit = "hit";
-	else
-		hit = "miss";
-	view.displayCell(hit, "oponent", game.last_shot);
+	view.displayCell(hit, "player", mes);
 }
 	
 
-game.setShips = function(file) {
+game.setShips = function(file, callback) {
 	let xhttp = new XMLHttpRequest();
-	xhttp.onreadystatechange = game.handleShot;
+	xhttp.onreadystatechange = callback;
 	xhttp.open("POST", file, true);
 	xhttp.send("");
+}
+
+game.setcallback = function() {
+	if(this.readyState < 4)
+		return ;
+	if(this.responseText == "Y")  // it is your turn to fire
+		return ;
+	else {						  // a shot has come
+		this.func = game.handleShot;
+		this.func();
+	}
 }
 
 game.initGame = function() {
@@ -219,7 +240,7 @@ game.initGame = function() {
 	file_request = "/game?" + file_request;
 	let but = document.getElementById("fireButton");
 	but.onclick = game.shot;
-	this.setShips(file_request);
+	this.setShips(file_request, this.setcallback);
 };
 
 function main() {
