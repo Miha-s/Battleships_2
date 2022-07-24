@@ -33,10 +33,11 @@ int read_line(char* mes, char* &header, char* &data, char* &next)
 		if(mes[i] == 0)
 			return 0; 
     mes[i] = 0;
+    i++;
     for(; mes[i] != '\n';i++) 
 		if(mes[i] == 0)
 			return 0;
-    next = mes+i+1;
+    next = mes+i;
     return 1;
 }
 
