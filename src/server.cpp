@@ -169,6 +169,25 @@ void Server::registerPlayer(ChatSession* ses, Headers& user_heads)
     }
 }
 
+void Server::processShot(ChatSession* ses)
+{
+    int gm = gms.findGameByPid(ses->id);
+    std::string body;
+    body = gms.games[gm].coords;
+    gms.setReady(ses->id, true);
+    int opid = gms.getOtherPid(ses->id);
+    ses->current = true;
+
+    int winer;
+    if((winer = gms.gameEnded(ses->id))) {
+        processEnd(winer, ses->id, body);
+        return ;
+    }
+
+    send(opid, body);
+    findCurrent(opid)->current = false;
+}
+
 void Server::shot(ChatSession* ses, Headers& user_heads)
 {
     std::string coords = get_post_data(user_heads.file);
@@ -179,25 +198,10 @@ void Server::shot(ChatSession* ses, Headers& user_heads)
     if(g == 'g' && gms.playerTurn(gms.getOtherPid(ses->id)) 
                 && !gms.playerReady(ses->id)) 
     {
-        std::string body;
-        body = gms.games[gm].coords;
-        gms.setReady(ses->id, true);
-        int opid = gms.getOtherPid(ses->id);
-        ses->current = true;
-
-        int winer;
-        if((winer = gms.gameEnded(ses->id))) {
-			processEnd(winer, ses->id, body);
-            return ;
-        }
-
-        send(opid, body);
-        findCurrent(opid)->current = false;
-
+        processShot(ses);
         return;
     } else if(g == 'g' || !gms.playerReady(ses->id)) {
-        std::string body = "N";
-        send(ses, body);
+        sendN(ses);
         return;
     }
 
@@ -207,10 +211,11 @@ void Server::shot(ChatSession* ses, Headers& user_heads)
     int res = gms.hit(y, x, ses->id);
     if(res == -1) {
         // not your turn
-        std::string body = "N";
-        send(ses, body);
+        sendN(ses);
         return;
     } 
+    // we save coords for later, when player send another
+    // "listening" request, we send these coords to other player
     gms.games[gm].coords = coords;
     gms.setReady(ses->id, false);
     
@@ -221,6 +226,12 @@ void Server::shot(ChatSession* ses, Headers& user_heads)
         body += "-";
 
     send(ses, body);
+}
+
+void Server::sendN(ChatSession* ses)
+{
+    std::string body = "N";
+    sendMes(ses->GetFd(), body);
 }
 
 void Server::send(ChatSession* ses, const std::string& body)
