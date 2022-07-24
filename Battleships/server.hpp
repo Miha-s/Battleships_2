@@ -57,6 +57,8 @@ class Server : public FdHandler {
 	void shot(ChatSession* ses, Headers& user_heads);
     void processShot(ChatSession* ses);
 
+    void processCookie(ChatSession* ses, Headers& user, Headers& serv);
+
 	void processEnd(int winer, int pid, std::string& coords);
 public:
 	void ProcessMessage(char *str, ChatSession* ses);

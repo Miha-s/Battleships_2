@@ -6,6 +6,7 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 #include <sys/sendfile.h>
+#include <chrono>
 
 #include "../Battleships/server.hpp"
 
@@ -95,6 +96,27 @@ void ChatSession::CheckMessage()
         }
 }
 
+void Server::processCookie(ChatSession* ses, Headers& user, Headers& serv)
+{
+    if(user.cookies.empty()) {
+        serv.cookies = "id=";
+        serv.cookies += std::to_string(initial_id);
+        serv.cookies += "; Expires=";
+        auto now = std::chrono::system_clock::now();
+        now += std::chrono::hours(1);
+        long c_time = std::chrono::system_clock::to_time_t(now);
+        std::string expires = ctime(&c_time);
+        expires.pop_back();
+        serv.cookies += expires;
+
+        ses->id = initial_id;
+        initial_id++;
+    } else {
+        ses->id = get_id(user.cookies);
+    }
+}
+
+
 void Server::ProcessMessage(char *str, ChatSession* ses)
 {
     // Process request
@@ -106,14 +128,7 @@ void Server::ProcessMessage(char *str, ChatSession* ses)
     Headers serv_heads;
 
     get_headers(str, user_heads);
-    if(user_heads.cookies.empty()) {
-        serv_heads.cookies = "id=";
-        serv_heads.cookies += std::to_string(initial_id);
-        ses->id = initial_id;
-        initial_id++;
-    } else {
-        ses->id = get_id(user_heads.cookies);
-    }
+    processCookie(ses, user_heads, serv_heads);
 
     if(gms.findGameByPid(ses->id) != -1)
         ses->in_game = true;
