@@ -127,6 +127,12 @@ void Server::ProcessMessage(char *str, ChatSession* ses)
         return ;
     }
 
+    if(user_heads.file == "/") {
+        if(gms.findGameByPid(ses->id) != -1) {
+            gms.removeGame(ses->id);
+        }
+    }
+
     int size;
     fillResponse(user_heads, serv_heads);
     int fd = open(serv_heads.file.c_str(), O_RDONLY);
