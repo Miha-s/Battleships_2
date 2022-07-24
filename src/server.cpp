@@ -181,7 +181,7 @@ void Server::registerPlayer(ChatSession* ses, Headers& user_heads)
         gms.setField(field, ses->id);
         ses->in_game = true;
         
-        std::string body = "N";  // None shot
+        std::string body = "Y";  // None shot
         send(first_player_id, body);
         ses->current = true;
         findCurrent(first_player_id)->current = false;
