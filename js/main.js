@@ -57,7 +57,7 @@ let game = {
 		setPicture() {},
 	},
 	initGame() {},
-	sendShips() {}, 
+	setShips(file) {}, 
 	shot() {},
 	handleShot() {}, 
 };
@@ -158,16 +158,23 @@ game.getPosition.parseShip = function() {
 	game.initGame();
 }
 
-game.setShips = function() {
+game.setShips = function(file) {
 	let xhttp = new XMLHttpRequest();
-	onreadystatechange = function() { alert("Ok"); }
-	xhttp.open("POST", "/page.html", true);
+	xhttp.onreadystatechange = game.handleShot;
+	xhttp.open("POST", file, true);
 	xhttp.send();
 }
 
 game.initGame = function() {
 	view.displayMessage("Your first message");
-	this.setShips();
+	let file_request = new String();
+	parameters.player_field.forEach( (e) => {
+		e.forEach( (el) => file_request += String(el) );
+	}); 
+	file_request = "/game?" + file_request;
+	let but = document.getElementById("fireButton");
+	but.onclick = game.shot;
+	this.setShips(file_request);
 };
 
 function main() {
