@@ -25,11 +25,10 @@ let parameters = {
 	oponent_field: [],
 	ships_sizes: new Map([
 	// first number is ship length, and second - amount of such ships
-	[1,1],
-		// [1, 4],
-		// [2, 3],
-		// [3, 2],
-		// [4, 1],
+		[1, 4],
+		[2, 3],
+		[3, 2],
+		[4, 1],
 	]),
 	ships_count:  0,
 	clear_field: function(field) {
