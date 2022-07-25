@@ -276,6 +276,12 @@ game.handleShot = function() {
 	let mes = this.responseText;
 	if(mes == "N")
 		return;
+	if(mes == "W" || mes == "L") {
+		game.processEnd(mes);
+		return ;
+	}
+	let arr = mes.split("\n");
+	mes = arr[0];
 	let y = Number(mes[0]);
 	let x = Number(mes[1]);
 	let hit;
@@ -284,6 +290,8 @@ game.handleShot = function() {
 	else
 		hit = "miss";
 	view.displayCell(hit, "player", mes);
+	if(arr.length > 1)
+		game.processEnd(arr[1]);
 }
 	
 
