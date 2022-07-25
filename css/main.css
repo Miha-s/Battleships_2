@@ -1,0 +1,57 @@
+
+:root {
+    --cell-size: 50px;
+}
+
+body {
+	background: #F2F2F2;
+	margin: 0;
+}
+div {
+	text-align: center;
+	margin: 20px;
+}
+
+div.center {
+	margin: 40px;
+	display: flex;
+	justify-content: space-between;
+}
+
+table {
+	margin: auto;
+	display: inline-block;
+}
+
+table, tr, td {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+td {
+	width: var(--cell-size);
+ 	height: var(--cell-size);
+}
+
+form {
+	display: inline-block;
+}
+
+.miss {
+	background: url("../img/hit.png") no-repeat center center;
+	background-size: contain;
+}
+
+.ship {
+	background: url("../img/ship.png") no-repeat center center;
+	background-size: contain;
+}
+
+.hit-ship {
+	background: url("../img/hit-ship.png") no-repeat center center;
+	background-size: contain;
+}
+
+.choose {
+	background-color: green;
+}

@@ -6,6 +6,7 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 #include <sys/sendfile.h>
+#include <chrono>
 
 #include "../Battleships/server.hpp"
 
@@ -95,6 +96,27 @@ void ChatSession::CheckMessage()
         }
 }
 
+void Server::processCookie(ChatSession* ses, Headers& user, Headers& serv)
+{
+    if(user.cookies.empty()) {
+        serv.cookies = "id=";
+        serv.cookies += std::to_string(initial_id);
+        serv.cookies += "; Expires=";
+        auto now = std::chrono::system_clock::now();
+        now += std::chrono::hours(1);
+        long c_time = std::chrono::system_clock::to_time_t(now);
+        std::string expires = ctime(&c_time);
+        expires.pop_back();
+        serv.cookies += expires;
+
+        ses->id = initial_id;
+        initial_id++;
+    } else {
+        ses->id = get_id(user.cookies);
+    }
+}
+
+
 void Server::ProcessMessage(char *str, ChatSession* ses)
 {
     // Process request
@@ -106,14 +128,7 @@ void Server::ProcessMessage(char *str, ChatSession* ses)
     Headers serv_heads;
 
     get_headers(str, user_heads);
-    if(user_heads.cookies.empty()) {
-        serv_heads.cookies = "id=";
-        serv_heads.cookies += std::to_string(initial_id);
-        ses->id = initial_id;
-        initial_id++;
-    } else {
-        ses->id = get_id(user_heads.cookies);
-    }
+    processCookie(ses, user_heads, serv_heads);
 
     if(gms.findGameByPid(ses->id) != -1)
         ses->in_game = true;
@@ -124,13 +139,20 @@ void Server::ProcessMessage(char *str, ChatSession* ses)
         } else {
             registerPlayer(ses, user_heads);
         }
+        return ;
+    }
+
+    if(user_heads.file == "/") {
+        if(gms.findGameByPid(ses->id) != -1) {
+            gms.removeGame(ses->id);
+        }
     }
 
     int size;
-    int fd = open(serv_heads.file.c_str(), O_RDONLY);
     fillResponse(user_heads, serv_heads);
+    int fd = open(serv_heads.file.c_str(), O_RDONLY);
 	size = strtol(serv_heads.contentLength.c_str(), nullptr, 10);
-
+    
     std::string response_header = set_headers(serv_heads);
 #ifdef DEBUGGING
     std::cout << response_header;
@@ -140,6 +162,7 @@ void Server::ProcessMessage(char *str, ChatSession* ses)
     int sd = ses->GetFd();
     write(sd, buf, strlen(buf));
     sendfile(sd, fd, NULL, size);
+    
     close(fd);
 }
 
@@ -151,17 +174,40 @@ void Server::registerPlayer(ChatSession* ses, Headers& user_heads)
         gms.addGame(ses->id, 0);
         gms.setField(field, ses->id);
         ses->in_game = true;
+        ses->current = true;
     } else {
         gms.addPlayer(first_player_id, ses->id);
         std::string field = get_post_data(user_heads.file);
         gms.setField(field, ses->id);
         ses->in_game = true;
         
-        std::string body = "N";  // None shot
+        std::string body = "Y";  // None shot
         send(first_player_id, body);
+        ses->current = true;
+        findCurrent(first_player_id)->current = false;
 
         first_player_id = 0;
     }
+}
+
+void Server::processShot(ChatSession* ses)
+{
+    int gm = gms.findGameByPid(ses->id);
+    std::string body;
+    body = gms.games[gm].coords;
+    gms.setReady(ses->id, true);
+    int opid = gms.getOtherPid(ses->id);
+    ses->current = true;
+
+    int winer;
+    if((winer = gms.gameEnded(ses->id))) {
+        processEnd(winer, ses->id, body);
+        return ;
+    }
+
+    send(opid, body);
+    findCurrent(opid)->current = false;
+
 }
 
 void Server::shot(ChatSession* ses, Headers& user_heads)
@@ -174,25 +220,10 @@ void Server::shot(ChatSession* ses, Headers& user_heads)
     if(g == 'g' && gms.playerTurn(gms.getOtherPid(ses->id)) 
                 && !gms.playerReady(ses->id)) 
     {
-        std::string body;
-        body = gms.games[gm].coords;
-        gms.setReady(ses->id, true);
-        int opid = gms.getOtherPid(ses->id);
-        ses->current = true;
-
-        int winer;
-        if((winer = gms.gameEnded(ses->id))) {
-			processEnd(winer, ses->id, body);
-            return ;
-        }
-
-        send(opid, body);
-        findCurrent(opid)->current = false;
-
+        processShot(ses);
         return;
     } else if(g == 'g' || !gms.playerReady(ses->id)) {
-        std::string body = "N";
-        send(ses, body);
+        sendN(ses);
         return;
     }
 
@@ -202,10 +233,11 @@ void Server::shot(ChatSession* ses, Headers& user_heads)
     int res = gms.hit(y, x, ses->id);
     if(res == -1) {
         // not your turn
-        std::string body = "N";
-        send(ses, body);
+        sendN(ses);
         return;
     } 
+    // we save coords for later, when player send another
+    // "listening" request, we send these coords to other player
     gms.games[gm].coords = coords;
     gms.setReady(ses->id, false);
     
@@ -216,6 +248,12 @@ void Server::shot(ChatSession* ses, Headers& user_heads)
         body += "-";
 
     send(ses, body);
+}
+
+void Server::sendN(ChatSession* ses)
+{
+    std::string body = "N";
+    sendMes(ses->GetFd(), body);
 }
 
 void Server::send(ChatSession* ses, const std::string& body)
@@ -238,7 +276,7 @@ void Server::sendMes(int sd, const std::string& body)
 #ifdef DEBUGGING
     std::cout << sd << std::endl;
     std::cout << response_header;
-    std::cout << body;
+    std::cout << body << std::endl;
 #endif
 
     const char* buf = response_header.c_str();

@@ -33,6 +33,7 @@ int read_line(char* mes, char* &header, char* &data, char* &next)
 		if(mes[i] == 0)
 			return 0; 
     mes[i] = 0;
+    i++;
     for(; mes[i] != '\n';i++) 
 		if(mes[i] == 0)
 			return 0;
@@ -65,7 +66,7 @@ void get_headers(char *mes, Headers& h)
 
 void add_header(string& resp, const string& header, const string& val)
 {
-    resp += header + ":" + val + "\r\n";
+    resp += header + ": " + val + "\r\n";
 }
 
 string set_headers(Headers& h)
@@ -91,12 +92,17 @@ void fillResponse(Headers& user, Headers& serv)
     serv.contentType = get_type(user.file);
 	char* path = get_current_dir_name();
     serv.file += path;
-	serv.file += "../" + user.file;
+	serv.file += user.file;
     serv.connection = "Keep-Alive";
 
 	struct stat buf;
-	stat(serv.file.c_str(), &buf);
-    int size = buf.st_size;
+	int err = stat(serv.file.c_str(), &buf);
+    int size;
+    if(err)
+        size = 0;
+    else
+        size = buf.st_size;
+    
     serv.contentLength = std::to_string(size);
 
 	free(path);
