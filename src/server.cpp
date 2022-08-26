@@ -380,9 +380,10 @@ void Server::Handle(bool r, bool w)
         return;
 
 #ifdef DEBUGGING
-    auto user_addr = addr.sin_addr.s_addr;
     std::string adress(std::move(inet_ntoa(addr.sin_addr)));
-    std::cout << adress << std::endl;
+    unsigned short port = ntohs(addr.sin_port);
+    std::cout << "ip: " << adress << std::endl;
+    std::cout << "port: " << port << std::endl;
 #endif
 
     sessions.push_back(new ChatSession(this, sd));
