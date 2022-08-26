@@ -51,9 +51,13 @@ class Server : public FdHandler {
 	void sendMes(int fd, const std::string& mes);
 	void send(ChatSession* ses, const std::string& body);
 	void send(int id, const std::string& body);
+    void sendN(ChatSession* ses);
 
 	ChatSession* findCurrent(int id);
 	void shot(ChatSession* ses, Headers& user_heads);
+    void processShot(ChatSession* ses);
+
+    void processCookie(ChatSession* ses, Headers& user, Headers& serv);
 
 	void processEnd(int winer, int pid, std::string& coords);
 public:

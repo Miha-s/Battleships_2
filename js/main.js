@@ -25,11 +25,10 @@ let parameters = {
 	oponent_field: [],
 	ships_sizes: new Map([
 	// first number is ship length, and second - amount of such ships
-		[1, 3],
-		[2, 2],
+		[1, 4],
+		[2, 3],
 		[3, 2],
 		[4, 1],
-		[5, 1],
 	]),
 	ships_count:  0,
 	clear_field: function(field) {
@@ -55,16 +54,72 @@ let game = {
 		correctPosition(coords) {}, 
 		setData(coords) {}, 
 		setPicture() {},
+		validateShot(coords) {},
+		process_clicks: {
+			last_clicks: [],
+			click() {},
+			setCallbacks() {},
+			click_fire() {},
+			clear_field() {},
+			removeCallbacks() {},
+		},
 	},
 	last_shot: "N",
 	initGame() {},
 	setShips(file, callback) {}, 
 	shot() {},
 	handleShot() {}, 
-	validateShot(coords) {},
 	shotcallback() {},
 	setcallback() {},
 };
+
+game.getPosition.process_clicks.clear_field = function() {
+	this.last_clicks.forEach((e) => { let el = document.getElementById(e);
+									  el.removeAttribute("class"); });
+	this.last_clicks = [];
+}
+
+
+game.getPosition.process_clicks.click = function() {
+	if(this.hasAttribute("class"))
+		return;
+	let Input = document.getElementById("guessInput");
+
+	let val = Input.value;
+	if(game.getPosition.process_clicks.last_clicks.length != 0)
+		val += " ";
+	val += this.id;
+	Input.value = val;
+	this.setAttribute("class", "choose");
+	game.getPosition.process_clicks.last_clicks.push(this.id);
+}
+
+game.getPosition.process_clicks.click_fire = function() {
+	let Input = document.getElementById("guessInput");
+	Input.value = this.id[0] + this.id[1];
+	let but = document.getElementById("fireButton");
+	but.onclick();
+}
+
+game.getPosition.process_clicks.setCallbacks = function() {
+	for(let i = 0; i <  10; i++)
+		for(let j = 0; j < 10; j++) {
+			let id = String(i) + String(j);
+			let el = document.getElementById(id);
+			el.onclick = this.click;
+			el = document.getElementById(id+"i");
+			el.onclick = this.click_fire;
+		}
+}
+
+game.getPosition.process_clicks.removeCallbacks = function() {
+	for(let i = 0; i < 10; i++)
+		for(let j = 0; j < 10; j++) {
+			let id = String(i) + String(j);
+			let el = document.getElementById(id);
+			el.onclick = function() {};
+		}
+}	
 
 game.getPosition.correctPosition = function(coords) {
 	let first, second;
@@ -146,6 +201,7 @@ game.getPosition.setPicture = function() {
 
 
 game.getPosition.parseShip = function() {
+	game.getPosition.process_clicks.clear_field();
 	let Input = document.getElementById("guessInput");
 	let coords = Input.value;
 	Input.value = "";
@@ -162,7 +218,7 @@ game.getPosition.parseShip = function() {
 	game.initGame();
 }
 
-game.validateShot = function(coords) {
+game.getPosition.validateShot = function(coords) {
 	if(Number.isNaN(Number(coords[0])))
 		return false;
 	if(Number.isNaN(Number(coords[1])))
@@ -179,7 +235,7 @@ game.shot = function () {
 	
 	game.last_shot = coords[0] + coords[1];
 	let file = "/game?" + game.last_shot;
-	game.setShips(file);
+	game.setShips(file, game.shotcallback);
 }
 
 game.shotcallback = function () {
@@ -219,6 +275,12 @@ game.handleShot = function() {
 	let mes = this.responseText;
 	if(mes == "N")
 		return;
+	if(mes == "W" || mes == "L") {
+		game.processEnd(mes);
+		return ;
+	}
+	let arr = mes.split("\n");
+	mes = arr[0];
 	let y = Number(mes[0]);
 	let x = Number(mes[1]);
 	let hit;
@@ -227,6 +289,8 @@ game.handleShot = function() {
 	else
 		hit = "miss";
 	view.displayCell(hit, "player", mes);
+	if(arr.length > 1)
+		game.processEnd(arr[1]);
 }
 	
 
@@ -251,6 +315,7 @@ game.setcallback = function() {
 }
 
 game.initGame = function() {
+	game.getPosition.process_clicks.removeCallbacks();
 	view.displayMessage("Waiting for other player");
 	let file_request = new String();
 	parameters.player_field.forEach( (e) => {
@@ -265,6 +330,8 @@ game.initGame = function() {
 function main() {
 	let but = document.getElementById("fireButton");
 	but.onclick = game.getPosition.parseShip;
+	game.getPosition.process_clicks.setCallbacks();
+	document.onkeyup = (e) => { if(e.keyCode == 13) game.getPosition.parseShip(); };
 	view.displayMessage("Hello Stranger! \n Enter all your ships below: ");
 }
 

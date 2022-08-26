@@ -51,3 +51,7 @@ form {
 	background: url("../img/hit-ship.png") no-repeat center center;
 	background-size: contain;
 }
+
+.choose {
+	background-color: green;
+}
