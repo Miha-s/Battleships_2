@@ -6,6 +6,8 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 #include <sys/sendfile.h>
+#include <arpa/inet.h>
+
 
 #include "../Battleships/server.hpp"
 
@@ -338,6 +340,12 @@ void Server::Handle(bool r, bool w)
     sd = accept(GetFd(), (struct sockaddr*) &addr, &len);
     if(sd == -1)
         return;
+
+#ifdef DEBUGGING
+    auto user_addr = addr.sin_addr.s_addr;
+    std::string adress(std::move(inet_ntoa(addr.sin_addr)));
+    std::cout << adress << std::endl;
+#endif
 
     sessions.push_back(new ChatSession(this, sd));
     
